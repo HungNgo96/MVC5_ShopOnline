@@ -14,7 +14,7 @@ using System.Xml.Linq;
 
 namespace OnlineShop.Controllers
 {
-    
+
     public class UserController : Controller
     {
         private Uri RedirectUri
@@ -41,19 +41,59 @@ namespace OnlineShop.Controllers
 
             return View();
         }
+        public class Media
+        {
+            public  string media_fbid { get; set; }
+        }
+        public class Message{
+            public string message { get; set; }
+            public List<Media> attached_media { get; set; }
+        }
         public ActionResult LoginFacebook()
         {
-            var fb = new FacebookClient();
-            var loginUrl = fb.GetLoginUrl(new
+            List<KeyValuePair<string, string>> kvpList = new List<KeyValuePair<string, string>>()
+                {
+                    new KeyValuePair<string, string>("message", "hello c# 2"),
+                    //new KeyValuePair<string, string>("Key2", "Value2"),
+                    //new KeyValuePair<string, string>("Key3", "Value3"),
+                };
+            IDictionary<string, string> dict = new Dictionary<string, string>();
+            dict.Add("message", "hello c# 2");
+            List<Media> media = new List<Media>();
+            media.Add(new Media { media_fbid = "118260873255806" });
+            //media.Add(new Media { media_fbid = "104155871332974" });
+            new Media { media_fbid = "104155871332973" };
+            var data = kvpList[0];
+            Message test = new Message { message = "hello c# 2", attached_media = media };
+            String[] imgMedia = { "media_fbid:111784317236795" };
+            string url = @"https://gamek.mediacdn.vn/2019/11/10/photo-1-1573366258156653138097.jpg";
+            //var ob = {
+            //       url=>url,
+            //         access_token: access_token,
+            //         published: false
+            //    }
+            var pageID = @"100644248350802";
+            var token = @"EAACttKh3UaABAMQ0lnHgZBV2On61ujOyadRc6smgE7D1b5zeVGpZCP0HUZCmGzpyoKtyYBDQsfzUArbKfBZCSz7RRrwQ2iWphIyg5raV5MH4fJMKP3GRB1wyRJ9JeLWRXdzv5HlUg6X68WwnZAcYjFRRUJxSZBsq9lTMZANFpsbTvsvjZAgDIsFVV59KLfkiW72c90cKnET84wZDZD";
+            var fb = new FacebookClient(token);
+            try
             {
-                client_id = ConfigurationManager.AppSettings["FbAppId"],
-                client_secret = ConfigurationManager.AppSettings["FbAppSecret"],
-                redirect_uri = RedirectUri.AbsoluteUri,
-                response_type = "code",
-                scope = "email",
-            });
+                dynamic result = fb.Post($"{pageID}/feed", test);
+            }catch(Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+            
 
-            return Redirect(loginUrl.AbsoluteUri);
+            //var loginUrl = fb.GetLoginUrl(new
+            //{
+            //    client_id = ConfigurationManager.AppSettings["FbAppId"],
+            //    client_secret = ConfigurationManager.AppSettings["FbAppSecret"],
+            //    redirect_uri = RedirectUri.AbsoluteUri,
+            //    response_type = "code",
+            //    scope = "email",
+            //});
+
+            return RedirectToAction("Login");
         }
 
         public ActionResult FacebookCallback(string code)
@@ -170,7 +210,7 @@ namespace OnlineShop.Controllers
                     {
                         user.DistrictID = int.Parse(model.DistrictID);
                     }
-                   
+
                     var result = dao.Insert(user);
                     if (result > 0)
                     {
